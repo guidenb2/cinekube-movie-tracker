@@ -5,13 +5,20 @@
             [cinekube-movie-tracker.configuration :as config]
             [reitit.ring :as ring]))
 
-(defn handler [_]
+(defn handler [{:keys [config]}]
+  (println config)
   {:status 200, :content-type "application/json", :body (str {:currently-watching ["Gangs of New York" "Goodfellas"]})})
 
+(defn config-middleware [handler config]
+  (fn [request]
+    (handler (assoc request :config config))))
+
 (def app
-  (ring/ring-handler
-    (ring/router
-      [["/watching" {:get handler}]])))
+  (let [config (config/read-config)]
+    (ring/ring-handler
+      (ring/router
+        [["/watching" {:get {:middleware [[config-middleware config]]
+                             :handler handler}}]]))))
 
 (defn init-server []
   (let [config (config/read-config)]
