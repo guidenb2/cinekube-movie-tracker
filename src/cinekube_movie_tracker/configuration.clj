@@ -5,5 +5,5 @@
 
 
 (defn read-config []
-  (with-open [r (io/reader (.getFile (io/resource "config.edn")))]
+  (with-open [r (io/reader (io/input-stream (io/resource "config.edn")))]
     (edn/read (PushbackReader. r))))
